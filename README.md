@@ -1,14 +1,12 @@
 # Terrain-Weighted Path Planning Simulation
 
-A Python simulation comparing standard A*, any-angle Theta*, and a terrain-cost-weighted variant of Theta* for path planning on a simulated disaster-like terrain grid. I built this as a hands-on preview of the cost-modeling approach in my Master's research proposal on terrain-informed exploration for tracked ground rescue robots.
+A Python simulation comparing standard A*, any-angle Theta*, and a terrain-cost-weighted variant of Theta* for path planning on a simulated grid environment.
 
-## Why I built this
-
-My research proposal argues that path planning for rescue robots should weight traversal cost by terrain difficulty (rubble, slopes) rather than distance alone, building on Theta* and recent terrain-aware planning research. Before starting graduate work, I wanted to actually implement and test this idea at a small scale, rather than only describe it on paper. This project is that test.
+**Author:** Prachi Kumari — [GitHub: Sanguine21](https://github.com/Sanguine21)
 
 ## What it does
 
-1. Generates a 30x30 grid representing a disaster site, where each cell has a random terrain difficulty score (1 = flat ground, 5 = rubble/steep slope), plus a few impassable obstacle cells.
+1. Generates a 30x30 grid where each cell has a random terrain difficulty score (1 = flat ground, 5 = rough/hard terrain), plus a few impassable obstacle cells.
 2. Finds a path from one corner to the other using three methods:
    - **A\*** — standard grid search, cost based on distance only.
    - **Theta\*** — any-angle search that uses line-of-sight shortcuts to produce shorter, smoother paths than A*.
@@ -17,35 +15,40 @@ My research proposal argues that path planning for rescue robots should weight t
 
 ## Example result
 
-Running with a fixed random seed produced:
+Running with `seed=85` produced:
 
-| Method | Steps | Physical distance | Cost | Time |
-|---|---|---|---|---|
-| A* (baseline) | 31 | 41.6 | 41.6 | 0.44 ms |
-| Theta* (any-angle) | 3 | 41.1 | 41.1 | 1.19 ms |
-| Theta* (terrain-weighted) | 7 | 44.0 | 107.3 | 41.76 ms |
+| Method | Steps | Cost | Time |
+|---|---|---|---|
+| A* (baseline) | 31 | 41.6 | 0.30 ms |
+| Theta* (any-angle) | 4 | 41.13 | 0.84 ms |
+| Theta* (terrain-weighted) | 9 | 102.19 | 41.30 ms |
 
-The terrain-weighted planner routes around the highest-cost terrain, accepting a longer physical path in exchange for lower traversal difficulty — the exact tradeoff my proposal is built around. Changing the random seed changes the terrain layout and the resulting numbers, confirming the paths are computed live rather than fixed.
+The terrain-weighted planner routes around the highest-cost terrain, accepting a longer physical path in exchange for lower traversal difficulty. Changing the random seed changes the terrain layout and the resulting numbers, confirming the paths are computed live rather than fixed.
 
 ![Comparison of A*, Theta*, and terrain-weighted Theta*](comparison.png)
 
+## File structure
+
+```
+terrain-weighted-path-planning/
+├── terrain_planner.py   # Main script: grid generation, A*, Theta*, terrain-weighted Theta*, visualization
+├── requirements.txt     # Python dependencies
+├── comparison.png        # Example output image
+└── README.md
+```
+
 ## How to run it
 
-Requirements: Python 3.9+, `numpy`, `matplotlib`
+Requirements: Python 3.9+
 
 ```bash
-pip install numpy matplotlib
+pip install -r requirements.txt
 python terrain_planner.py
 ```
 
 This prints the comparison results to the terminal and saves `comparison.png` in the same folder. To test on a different random terrain, change the `seed` value passed to `build_grid()` near the bottom of the script.
 
-## Relation to my research proposal
+## References
 
-This is a small-scale, simulation-only preview of Objective 1 and part of the methodology in my proposal ("Terrain-Informed Any-Angle Path Planning for Energy-Efficient Exploration of Tracked Ground Rescue Robots in Post-Disaster Environments"), which extends this idea further: a risk-aware cost model, frontier-based exploration target selection under battery and retrieval constraints, and evaluation in ROS2/Gazebo against standard baselines. This repository is not that full system — it's a focused test of the core idea (terrain-weighted any-angle cost) before starting that larger work.
-
-## What I'd extend next
-
-- Add the risk-aware, two-stage cost structure described in my proposal, rather than pure terrain-cost weighting.
-- Add frontier-based exploration instead of single-goal path planning.
-- Move from a static grid to ROS2/Gazebo simulation with a simulated tracked robot.
+- A. Nash, K. Daniel, S. Koenig, and A. Felner, "Theta*: Any-angle path planning on grids," *Journal of Artificial Intelligence Research*, vol. 39, pp. 533-579, 2010.
+- P. E. Hart, N. J. Nilsson, and B. Raphael, "A Formal Basis for the Heuristic Determination of Minimum Cost Paths," *IEEE Transactions on Systems Science and Cybernetics*, vol. 4, no. 2, pp. 100-107, 1968.
